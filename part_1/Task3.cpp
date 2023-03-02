@@ -23,9 +23,9 @@ int genCamMat(cv::Mat& camMat, cv::Size frameSize) {
 	camMat = cv::Mat::zeros(cmSize, CV_64FC1);
 
 	camMat.at<double>(0, 0) = 1;
-	camMat.at<double>(2, 0) = frameSize.width / static_cast<double>(2);
+	camMat.at<double>(0, 2) = frameSize.width / static_cast<double>(2);
 	camMat.at<double>(1, 1) = 1;
-	camMat.at<double>(2, 1) = frameSize.height / static_cast<double>(2);
+	camMat.at<double>(1, 2) = frameSize.height / static_cast<double>(2);
 	camMat.at<double>(2, 2) = 1;
 	return 0;
 }

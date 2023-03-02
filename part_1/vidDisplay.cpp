@@ -107,19 +107,27 @@ int displayLiveVideoFeed(cv::VideoCapture *capdev){
             genCamMat(cameraMat, refS);
 
             //initialize distortion coeffs 
-            cv::Mat distCoeff;
+            cv::Mat distCoeff = cv::Mat::zeros(cv::Size(1,5), CV_64FC1);;
 
             //initialize rotation and translation vectors
             std::vector<cv::Mat> rvecs, tvecs;
 
             //refS from above is the size
             //Calibrate the camera
-            //Still need to figure out flag
+            std::cout << "Camera Mat pre-calib:" << cameraMat << std::endl;
+            std::cout << "Distortion Coeffs pre-calib:" << distCoeff << std::endl;
+
             double reprojError = cv::calibrateCamera(point_list, corner_list, refS, cameraMat, distCoeff, rvecs, tvecs, CV_CALIB_FIX_ASPECT_RATIO);
+
+            std::cout << "Camera Mat post-calib:" << cameraMat << std::endl;
+            std::cout << "Distortion Coeffs post-calib:" << distCoeff << std::endl;
 
             std::cout << "Reprojection error:" << reprojError << std::endl;
 
             printMats(cameraMat, distCoeff);
+
+            filterOn = false;
+            lastFilterSelected = 'o';
         }
         // get original feed in color
         else if (key == 'o'){
