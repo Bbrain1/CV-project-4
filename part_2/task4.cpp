@@ -27,8 +27,8 @@ int readMats(cv::Mat &camMat, cv::Mat &distMat) {
 		printf("Enter your name: ");
 		std::cin >> name;
 	}
-
-	std::string fileName = name + "_calibration.json";
+    // ----- LOOK HERE, CHANGE ----
+	std::string fileName = "/Users/chandlersmith/Desktop/CS5330/CV-project-4/part_2/part_2/" + name + "_calibration.json";
 
 	cv::FileStorage fs(fileName, cv::FileStorage::READ);
 

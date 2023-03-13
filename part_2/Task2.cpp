@@ -15,7 +15,7 @@ int genPointSet(std::vector<cv::Vec3f> &point_set, cv::Size patternSize) {
 		for (int i = 0; i < patternSize.width; i++) {
 			cv::Vec3f thisPoint;
 			thisPoint[0] = i;
-			thisPoint[1] = -j;
+			thisPoint[1] = j;
 			thisPoint[2] = 0;
 			point_set.push_back(thisPoint);
 		}
