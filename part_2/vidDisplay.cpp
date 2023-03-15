@@ -18,7 +18,8 @@
 #include "Task4.h"
 #include "Task5.hpp"
 #include "Task6.hpp"
-#include "Task7.hpp"
+//#include "Task7.hpp" //comment this back in
+#include "ext1.h"
 #include <fstream>
 #include <iostream>
 
@@ -143,14 +144,36 @@ int displayLiveVideoFeed(cv::VideoCapture *capdev){
                     cv::drawChessboardCorners(filteredFrame, patternSize, corner_set, patternFound);
                     cv::Mat rvec,tvec;
                     cv::solvePnP(point_set, corner_set, camMat, distCoeff, rvec,tvec);
-                    surf(filteredFrame);
+                    /*surf(filteredFrame);*/ //comment this back in
                 }
                 else {
                     std::cout << "pattern not found" << std::endl;
                     lastFilterSelected = 'o';
                     filterOn = false;
                 }
-        }
+            }
+
+            // Extension 1: hide target
+            else if (lastFilterSelected == 'b') {
+                patternFound = cv::findChessboardCorners(originalFrame, patternSize, corner_set);
+                std::cout << corner_set.size() << std::endl;
+                if (patternFound) {
+                    cv::Mat grey;
+                    cv::cvtColor(originalFrame, grey, CV_BGR2GRAY);
+                    cv::cornerSubPix(grey, corner_set, cv::Size(5, 5), cv::Size(-1, -1),
+                        cv::TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1));
+                    
+                    cv::Mat rvec, tvec;
+                    cv::solvePnP(point_set, corner_set, camMat, distCoeff, rvec, tvec);
+                    hideChessboard(filteredFrame, camMat, rvec, tvec, distCoeff, patternSize);
+                    cv::drawChessboardCorners(filteredFrame, patternSize, corner_set, patternFound);
+                }
+                else {
+                    std::cout << "pattern not found" << std::endl;
+                    lastFilterSelected = 'o';
+                    filterOn = false;
+                }
+            }
                 originalFrame = filteredFrame;
         }
     
@@ -173,7 +196,7 @@ int displayLiveVideoFeed(cv::VideoCapture *capdev){
             lastFilterSelected = key;
         }
         else if(key == 'x'){
-            // thresholding
+            // solve pnp
             filterOn = true;
             lastFilterSelected = key;
         }
@@ -190,6 +213,12 @@ int displayLiveVideoFeed(cv::VideoCapture *capdev){
         }
         else if(key == 'w'){
             // key features
+            filterOn = true;
+            lastFilterSelected = key;
+        }
+
+        else if (key == 'b') {
+            // blur target
             filterOn = true;
             lastFilterSelected = key;
         }
