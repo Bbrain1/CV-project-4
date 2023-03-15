@@ -8,6 +8,7 @@ Bennett Brain and Chandler Smith
 
 Video link for full project
 https://drive.google.com/file/d/1RA1zzGkQ__GC4fhpxtL2Bd2bblIKJBD9/view?usp=sharing
+
 Video link for extension 3: Custom checker piece
 https://drive.google.com/file/d/1DWe1iSnHYf_xnbaOKl_QbamBScOFtyqQ/view?usp=sharing
 
