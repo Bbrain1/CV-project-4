@@ -16,6 +16,9 @@
 #include "filter.h"
 #include "Task2.h"
 #include "Task4.h"
+#include "Task5.hpp"
+#include "Task6.hpp"
+#include "Task7.hpp"
 #include <fstream>
 #include <iostream>
 
@@ -47,6 +50,7 @@ int displayLiveVideoFeed(cv::VideoCapture *capdev){
     cv::Mat camMat;
     cv::Mat distCoeff;
     readMats(camMat, distCoeff);
+    cv::Mat rvec, tvec;
 
 
     for(;;) {
@@ -57,28 +61,27 @@ int displayLiveVideoFeed(cv::VideoCapture *capdev){
         }
         //if filter is on display filter frame
         if (filterOn && lastFilterSelected != 'o') {
-
+            
             filteredFrame = originalFrame.clone();
-            if(lastFilterSelected == '4'){
+            if(lastFilterSelected == 'x'){
                 patternFound = cv::findChessboardCorners(originalFrame, patternSize, corner_set);
                 std::cout << corner_set.size() << std::endl;
                 if (patternFound) {
                     cv::Mat grey;
                     cv::cvtColor(originalFrame, grey, CV_BGR2GRAY);
                     cv::cornerSubPix(grey,corner_set, cv::Size(5, 5), cv::Size(-1, -1),
-                        cv::TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1));
+                                     cv::TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1));
                     cv::drawChessboardCorners(filteredFrame, patternSize, corner_set, patternFound);
-
+                    
                     cv::Mat rvec,tvec;
-
+                    
                     cv::solvePnP(point_set, corner_set, camMat, distCoeff, rvec,tvec);
-
+                    
                     std::cout << "Rotation vector: " << rvec << std::endl;
                     std::cout << "Translation vector: " << tvec << std::endl;
 
-
                 }
-
+                
                 else {
                     std::cout << "pattern not found" << std::endl;
                     lastFilterSelected = 'o';
@@ -86,15 +89,77 @@ int displayLiveVideoFeed(cv::VideoCapture *capdev){
                 }
                 
             }
-
+            // Start task 5: Plot 3D Axis
+            else if(lastFilterSelected == 'y'){
+                    patternFound = cv::findChessboardCorners(originalFrame, patternSize, corner_set);
+                    std::cout << corner_set.size() << std::endl;
+                    if (patternFound) {
+                        cv::Mat grey;
+                        cv::cvtColor(originalFrame, grey, CV_BGR2GRAY);
+                        cv::cornerSubPix(grey,corner_set, cv::Size(5, 5), cv::Size(-1, -1),
+                                         cv::TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1));
+                        cv::drawChessboardCorners(filteredFrame, patternSize, corner_set, patternFound);
+                        cv::Mat rvec,tvec;
+                        cv::solvePnP(point_set, corner_set, camMat, distCoeff, rvec,tvec);
+                        Plot3D(filteredFrame, camMat, rvec, tvec, distCoeff, corner_set);
+                    }
+                    else {
+                        std::cout << "pattern not found" << std::endl;
+                        lastFilterSelected = 'o';
+                        filterOn = false;
+                    }
+            }
             
-            
-            originalFrame = filteredFrame;
+            // Start task 6: Plot Virtual Objects
+            else if(lastFilterSelected == 'z'){
+                
+                    patternFound = cv::findChessboardCorners(originalFrame, patternSize, corner_set);
+                    std::cout << corner_set.size() << std::endl;
+                    if (patternFound) {
+                        cv::Mat grey;
+                        cv::cvtColor(originalFrame, grey, CV_BGR2GRAY);
+                        cv::cornerSubPix(grey,corner_set, cv::Size(5, 5), cv::Size(-1, -1),
+                                         cv::TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1));
+                        cv::drawChessboardCorners(filteredFrame, patternSize, corner_set, patternFound);
+                        cv::Mat rvec,tvec;
+                        cv::solvePnP(point_set, corner_set, camMat, distCoeff, rvec,tvec);
+                        virtualObject(filteredFrame, camMat, rvec, tvec, distCoeff, corner_set);
+                    }
+                    else {
+                        std::cout << "pattern not found" << std::endl;
+                        lastFilterSelected = 'o';
+                        filterOn = false;
+                    }
+            }
+            // Start task 7: Plot feature detection
+            else if(lastFilterSelected == 'w'){
+                patternFound = cv::findChessboardCorners(originalFrame, patternSize, corner_set);
+                std::cout << corner_set.size() << std::endl;
+                if (patternFound) {
+                    cv::Mat grey;
+                    cv::cvtColor(originalFrame, grey, CV_BGR2GRAY);
+                    cv::cornerSubPix(grey,corner_set, cv::Size(5, 5), cv::Size(-1, -1),
+                                     cv::TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1));
+                    cv::drawChessboardCorners(filteredFrame, patternSize, corner_set, patternFound);
+                    cv::Mat rvec,tvec;
+                    cv::solvePnP(point_set, corner_set, camMat, distCoeff, rvec,tvec);
+                    surf(filteredFrame);
+                }
+                else {
+                    std::cout << "pattern not found" << std::endl;
+                    lastFilterSelected = 'o';
+                    filterOn = false;
+                }
         }
+                originalFrame = filteredFrame;
+        }
+    
+        
         cv::imshow("Live Video", originalFrame);
         
         // see if there is a waiting keystroke
         char key = cv::waitKey(10);
+        std::cout << key;
         if( key == 'q') {
             // to quit
             delete capdev;
@@ -107,11 +172,28 @@ int displayLiveVideoFeed(cv::VideoCapture *capdev){
             filterOn = false;
             lastFilterSelected = key;
         }
-        else if(key == '4'){
+        else if(key == 'x'){
             // thresholding
-            filterOn = !filterOn;
+            filterOn = true;
             lastFilterSelected = key;
         }
+        
+        else if(key == 'y'){
+            // Plot 3D axis
+            filterOn = true;
+            lastFilterSelected = key;
+        }
+        else if(key == 'z'){
+            // Plot object
+            filterOn = true;
+            lastFilterSelected = key;
+        }
+        else if(key == 'w'){
+            // key features
+            filterOn = true;
+            lastFilterSelected = key;
+        }
+        
     }
     return 0;
 }
