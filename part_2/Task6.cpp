@@ -33,7 +33,7 @@ int virtualObject(cv::Mat filteredFrame, cv::Mat camMat, cv::Mat rvec, cv::Mat t
     // Inverse Prism point for opposite corner
     imagePoints3D.push_back(cv::Point3d(0.5,1,2.0));
 
-       cv::projectPoints(imagePoints3D, rvec, tvec, camMat, distCoeff, imagePoints);
+    cv::projectPoints(imagePoints3D, rvec, tvec, camMat, distCoeff, imagePoints);
     
     // Shape - Prism 1 over square 1
     // Prism Bottom

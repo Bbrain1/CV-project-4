@@ -18,8 +18,9 @@
 #include "Task4.h"
 #include "Task5.hpp"
 #include "Task6.hpp"
-//#include "Task7.hpp" //comment this back in
+#include "Task7.hpp"
 #include "ext1.h"
+#include "ext2.hpp"
 #include <fstream>
 #include <iostream>
 
@@ -44,6 +45,9 @@ int displayLiveVideoFeed(cv::VideoCapture *capdev){
     genPointSet(point_set, patternSize);
     filterOn = false;
     bool patternFound;
+    bool checker = false;
+    float xstart;
+    float ystart;
     std::vector<cv::Point2f> corner_set;
     // o --> original
     lastFilterSelected = 'o';
@@ -144,7 +148,7 @@ int displayLiveVideoFeed(cv::VideoCapture *capdev){
                     cv::drawChessboardCorners(filteredFrame, patternSize, corner_set, patternFound);
                     cv::Mat rvec,tvec;
                     cv::solvePnP(point_set, corner_set, camMat, distCoeff, rvec,tvec);
-                    /*surf(filteredFrame);*/ //comment this back in
+                    surf(filteredFrame);
                 }
                 else {
                     std::cout << "pattern not found" << std::endl;
@@ -167,6 +171,40 @@ int displayLiveVideoFeed(cv::VideoCapture *capdev){
                     cv::solvePnP(point_set, corner_set, camMat, distCoeff, rvec, tvec);
                     hideChessboard(filteredFrame, camMat, rvec, tvec, distCoeff, patternSize);
                     cv::drawChessboardCorners(filteredFrame, patternSize, corner_set, patternFound);
+                }
+                else {
+                    std::cout << "pattern not found" << std::endl;
+                    lastFilterSelected = 'o';
+                    filterOn = false;
+                }
+            }
+            
+            // Extension 2: checkers pieces
+            else if (lastFilterSelected == 'c') {
+                patternFound = cv::findChessboardCorners(originalFrame, patternSize, corner_set);
+                std::cout << corner_set.size() << std::endl;
+                if (patternFound) {
+                    cv::Mat grey;
+                    cv::cvtColor(originalFrame, grey, CV_BGR2GRAY);
+                    cv::cornerSubPix(grey, corner_set, cv::Size(5, 5), cv::Size(-1, -1),
+                        cv::TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1));
+                    
+                    cv::Mat rvec, tvec;
+                    cv::solvePnP(point_set, corner_set, camMat, distCoeff, rvec, tvec);
+                    //cv::drawChessboardCorners(filteredFrame, patternSize, corner_set, patternFound);
+                    
+                    
+                    if(checker == false){
+                        printf("Enter your xstart point: ");
+                        std::cin >> xstart;
+                        
+                        printf("Enter your ystart point: ");
+                        std::cin >> ystart;
+                        checker = true;
+                        std::cout << xstart << ystart;
+                    }
+                    complexObject(filteredFrame, camMat, rvec, tvec, distCoeff, corner_set, xstart, ystart);
+
                 }
                 else {
                     std::cout << "pattern not found" << std::endl;
@@ -222,7 +260,12 @@ int displayLiveVideoFeed(cv::VideoCapture *capdev){
             filterOn = true;
             lastFilterSelected = key;
         }
-        
+        else if (key == 'c') {
+            // checkers
+            filterOn = true;
+            checker = false;
+            lastFilterSelected = key;
+        }
     }
     return 0;
 }
